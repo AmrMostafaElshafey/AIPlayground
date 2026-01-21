@@ -1,0 +1,9 @@
+body {
+  margin: 0;
+  background: #eef2ff;
+  font-family: "Cairo", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
