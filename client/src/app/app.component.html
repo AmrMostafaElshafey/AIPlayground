@@ -1,0 +1,226 @@
+<div class="page">
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-mark">ITI</span>
+      <div>
+        <p class="brand-title">AI Playground</p>
+        <p class="brand-subtitle">AI Governance & Service Enablement</p>
+      </div>
+    </div>
+    <nav class="nav-links">
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#roles">Roles</a>
+      <a href="#policy">Policy</a>
+      <a href="#requests">Requests</a>
+      <a class="cta" href="#prompts">Prompt Library</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <p class="pill">Enterprise Software Specification & AI Governance Platform</p>
+      <h1>ITI AI Playground</h1>
+      <p>
+        A centralized platform for responsible AI adoption across training and operations.
+        Discover approved services, submit access requests, and maintain full auditability.
+      </p>
+      <div class="hero-actions">
+        <button>Explore Services</button>
+        <button class="ghost">Download SSD Overview</button>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <h3>6+</h3>
+          <p>Service Categories</p>
+        </div>
+        <div>
+          <h3>7</h3>
+          <p>Role-Based Profiles</p>
+        </div>
+        <div>
+          <h3>24/7</h3>
+          <p>Policy Compliance</p>
+        </div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <h2>Mission Alignment</h2>
+      <p>
+        Enable controlled, transparent, and policy-compliant AI usage that strengthens ITI's
+        capacity building mandate.
+      </p>
+      <ul>
+        <li>Equitable access to AI services</li>
+        <li>Compliance with MCIT governance frameworks</li>
+        <li>Visibility and accountability for AI utilization</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="about" class="section">
+    <div class="section-header">
+      <h2>Introduction</h2>
+      <p>
+        The ITI AI Playground supports students, educators, employees, and administrators with
+        responsible AI enablement backed by governance controls and operational workflows.
+      </p>
+    </div>
+    <div class="grid two">
+      <div class="card">
+        <h3>Objectives & Strategic Goals</h3>
+        <ul>
+          <li>Enable controlled access to AI services.</li>
+          <li>Ensure policy compliance and ethical usage.</li>
+          <li>Equip educators with reusable prompt assets.</li>
+          <li>Enhance visibility, transparency, and accountability.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Scope of the System</h3>
+        <ul>
+          <li>Service catalog management and ownership.</li>
+          <li>End-to-end workflows for request approvals.</li>
+          <li>Policy publication, versioning, and enforcement.</li>
+          <li>Prompt Library lifecycle management.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" class="section alt">
+    <div class="section-header">
+      <h2>AI Services Catalog</h2>
+      <p>Browse approved AI services and enterprise-grade resources curated by ITI.</p>
+    </div>
+    <div class="grid three">
+      <ng-container *ngIf="services$ | async as services">
+        <div class="card" *ngFor="let service of services">
+          <span class="badge">{{ service.category }}</span>
+          <h3>{{ service.name }}</h3>
+          <p>{{ service.description }}</p>
+          <div class="meta">
+            <span>Eligibility: {{ service.eligibility }}</span>
+            <span>Owner: {{ service.owner }}</span>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+
+  <section id="roles" class="section">
+    <div class="section-header">
+      <h2>Users, Roles, and Responsibilities</h2>
+      <p>Role-based access ensures accountability and ethical AI adoption across ITI.</p>
+    </div>
+    <div class="grid two">
+      <ng-container *ngIf="roles$ | async as roles">
+        <div class="card" *ngFor="let role of roles">
+          <h3>{{ role.name }}</h3>
+          <p>{{ role.responsibilities }}</p>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+
+  <section id="policy" class="section alt">
+    <div class="section-header">
+      <h2>AI Policy Highlights</h2>
+      <p>Guidance for responsible AI usage aligned with academic integrity and privacy.</p>
+    </div>
+    <div class="grid two">
+      <div class="card">
+        <h3>Policy Principles</h3>
+        <ul>
+          <li>AI augments human learning and instruction.</li>
+          <li>Human oversight is mandatory for AI-assisted outputs.</li>
+          <li>Sensitive data must never be shared externally.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Latest Policy Publication</h3>
+        <ng-container *ngIf="policies$ | async as policies">
+          <p class="policy-title">{{ policies[0]?.title }}</p>
+          <p class="policy-version">{{ policies[0]?.version }} · {{ policies[0]?.publishedOn | date }}</p>
+          <p>{{ policies[0]?.summary }}</p>
+        </ng-container>
+      </div>
+    </div>
+  </section>
+
+  <section id="prompts" class="section">
+    <div class="section-header">
+      <h2>Prompt Library</h2>
+      <p>Reusable, high-quality prompts aligned with ITI training tracks.</p>
+    </div>
+    <div class="grid three">
+      <ng-container *ngIf="prompts$ | async as prompts">
+        <div class="card" *ngFor="let prompt of prompts">
+          <span class="badge">{{ prompt.status }}</span>
+          <h3>{{ prompt.track }}</h3>
+          <p class="prompt-title">{{ prompt.title }}</p>
+          <p>{{ prompt.description }}</p>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+
+  <section id="requests" class="section alt">
+    <div class="section-header">
+      <h2>Service Request Workflow</h2>
+      <p>Submit access requests for AI services and track approvals.</p>
+    </div>
+    <div class="grid two">
+      <div class="card">
+        <h3>Request Access</h3>
+        <form (ngSubmit)="submitRequest()" class="form">
+          <label>
+            Full Name
+            <input [(ngModel)]="requestDraft.requesterName" name="requesterName" placeholder="Enter your name" />
+          </label>
+          <label>
+            Role
+            <input [(ngModel)]="requestDraft.role" name="role" placeholder="Student, Educator, Employee" />
+          </label>
+          <label>
+            Service
+            <input [(ngModel)]="requestDraft.serviceName" name="serviceName" placeholder="Requested service" />
+          </label>
+          <label>
+            Intended Use
+            <textarea [(ngModel)]="requestDraft.intendedUse" name="intendedUse" rows="3"></textarea>
+          </label>
+          <label>
+            Duration
+            <input [(ngModel)]="requestDraft.duration" name="duration" placeholder="e.g. 3 months" />
+          </label>
+          <button type="submit">Submit Request</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Recent Requests</h3>
+        <ng-container *ngIf="requests$ | async as requests">
+          <div class="request" *ngFor="let request of requests">
+            <div>
+              <p class="request-title">{{ request.requesterName }} · {{ request.serviceName }}</p>
+              <p class="request-meta">{{ request.role }} · {{ request.duration }}</p>
+            </div>
+            <span class="status">{{ request.status }}</span>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>
+      <h3>ITI AI Playground</h3>
+      <p>Information Technology Institute · MCIT · Egypt</p>
+    </div>
+    <div>
+      <p>Contact</p>
+      <p>ai-governance@iti.gov.eg</p>
+      <p>+20 (2) 1234 5678</p>
+    </div>
+  </footer>
+</div>
