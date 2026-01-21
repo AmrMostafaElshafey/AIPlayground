@@ -16,27 +16,19 @@ public static class DbSeeder
             {
                 Name = "Generative AI Platforms",
                 Category = "AI Services",
-                Provider = "OpenAI",
                 Description = "Access to approved generative AI tools for training and research.",
                 Eligibility = "Students, educators, and ITI employees with policy acknowledgment.",
                 AccessRules = "Requests reviewed by approvers and service owners.",
-                Owner = "AI Governance Office",
-                IsApiAccess = true,
-                StudentTokenLimit = 100000,
-                EmployeeTokenLimit = 250000
+                Owner = "AI Governance Office"
             },
             new ServiceCatalogItem
             {
                 Name = "Cloud AI Resources",
                 Category = "Cloud Computing",
-                Provider = "Azure",
                 Description = "Provisioned Azure and AWS AI services with compliance guardrails.",
                 Eligibility = "Service owners and approved project teams.",
                 AccessRules = "Usage monitored with quarterly audits.",
-                Owner = "Infrastructure Division",
-                IsApiAccess = false,
-                StudentTokenLimit = 0,
-                EmployeeTokenLimit = 0
+                Owner = "Infrastructure Division"
             });
 
         context.Policies.Add(new PolicyDocument
@@ -73,12 +65,9 @@ public static class DbSeeder
         {
             RequesterName = "Nour Ahmed",
             Role = "Educator",
-            ServiceId = 1,
             ServiceName = "Generative AI Platforms",
-            ApplicationName = "AI Track Assessments",
             IntendedUse = "Create formative assessments for AI track.",
             Duration = "3 months",
-            EstimatedTokens = 45000,
             Status = "Approved",
             DecisionNotes = "Approved with monthly usage reporting.",
             SubmittedAt = DateTime.UtcNow.AddDays(-10)
