@@ -1,0 +1,511 @@
+<div class="page">
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-mark">ITI</span>
+      <div>
+        <p class="brand-title">AI Playground</p>
+        <p class="brand-subtitle">AI Governance & Service Enablement</p>
+      </div>
+    </div>
+    <nav class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#requests">Requests</a>
+      <a href="#policy">Policy</a>
+      <a href="#prompts">Prompt Library</a>
+      <a href="#admin" class="cta">Admin Console</a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>AI Service Providers</h3>
+      <p class="muted">Quick links to approved services.</p>
+      <ul>
+        <li *ngFor="let service of services">
+          <button class="link" (click)="selectService(service)">
+            {{ service.provider }} · {{ service.name }}
+          </button>
+        </li>
+      </ul>
+      <div class="sidebar-card">
+        <h4>Guest Access</h4>
+        <p>Guests can browse services and policy highlights.</p>
+      </div>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <p class="pill">Enterprise Software Specification & AI Governance Platform</p>
+          <h1>ITI AI Playground</h1>
+          <p>
+            A centralized platform for responsible AI adoption across training and operations. Discover
+            approved services, submit access requests, and maintain full auditability.
+          </p>
+          <div class="hero-actions">
+            <button>Explore Services</button>
+            <button class="ghost">Download SSD Overview</button>
+          </div>
+          <div class="hero-stats">
+            <div>
+              <h3>{{ services.length }}</h3>
+              <p>Service Categories</p>
+            </div>
+            <div>
+              <h3>{{ roles.length }}</h3>
+              <p>Role Profiles</p>
+            </div>
+            <div>
+              <h3>{{ prompts.length }}</h3>
+              <p>Prompt Assets</p>
+            </div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <h2>Mission Alignment</h2>
+          <p>
+            Enable controlled, transparent, and policy-compliant AI usage that strengthens ITI's capacity
+            building mandate.
+          </p>
+          <ul>
+            <li>Equitable access to AI services</li>
+            <li>Compliance with MCIT governance frameworks</li>
+            <li>Visibility and accountability for AI utilization</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" id="services">
+        <div class="section-header">
+          <h2>AI Services Catalog</h2>
+          <p>Browse approved AI services with role-based usage limits and governance rules.</p>
+        </div>
+        <div class="grid three">
+          <div class="card" *ngFor="let service of services">
+            <span class="badge">{{ service.category }}</span>
+            <h3>{{ service.name }}</h3>
+            <p class="muted">Provider: {{ service.provider }}</p>
+            <p>{{ service.description }}</p>
+            <div class="meta">
+              <span>Eligibility: {{ service.eligibility }}</span>
+              <span>Owner: {{ service.owner }}</span>
+              <span *ngIf="service.isApiAccess">
+                Student limit: {{ service.studentTokenLimit | number }} tokens
+              </span>
+              <span *ngIf="service.isApiAccess">
+                Employee limit: {{ service.employeeTokenLimit | number }} tokens
+              </span>
+              <span *ngIf="!service.isApiAccess">API access not required</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="requests">
+        <div class="section-header">
+          <h2>Service Request Workflow</h2>
+          <p>Login to submit requests. Students have lower token limits than employees.</p>
+        </div>
+        <div class="grid two">
+          <div class="card">
+            <h3>User Login</h3>
+            <div class="form">
+              <label>
+                Full Name
+                <input [(ngModel)]="loginDraft.name" name="loginName" placeholder="Enter your name" />
+              </label>
+              <label>
+                Role
+                <select [(ngModel)]="loginDraft.role" name="loginRole">
+                  <option value="Student">Student</option>
+                  <option value="Employee">Employee</option>
+                  <option value="Administrator">Administrator</option>
+                </select>
+              </label>
+              <div class="row">
+                <button type="button" (click)="login()">Login</button>
+                <button type="button" class="ghost" (click)="logout()">Logout</button>
+              </div>
+              <p class="muted">Current user: {{ authUser.name || 'Guest' }} · {{ authUser.role }}</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Request Access</h3>
+            <form (ngSubmit)="submitRequest()" class="form">
+              <label>
+                Service
+                <select [(ngModel)]="requestDraft.serviceId" name="serviceId">
+                  <option [ngValue]="0">Select a service</option>
+                  <option *ngFor="let service of services" [ngValue]="service.id">
+                    {{ service.provider }} · {{ service.name }}
+                  </option>
+                </select>
+              </label>
+              <label>
+                Application Name
+                <input [(ngModel)]="requestDraft.applicationName" name="applicationName" />
+              </label>
+              <label>
+                Intended Use
+                <textarea [(ngModel)]="requestDraft.intendedUse" name="intendedUse" rows="3"></textarea>
+              </label>
+              <label>
+                Duration
+                <input [(ngModel)]="requestDraft.duration" name="duration" placeholder="e.g. 3 months" />
+              </label>
+              <label>
+                Estimated Tokens (API access only)
+                <input
+                  type="number"
+                  [(ngModel)]="requestDraft.estimatedTokens"
+                  name="estimatedTokens"
+                  placeholder="Estimated tokens"
+                />
+              </label>
+              <button type="submit" [disabled]="!isAuthenticated">Submit Request</button>
+              <p class="muted" *ngIf="!isAuthenticated">Login is required to request a service.</p>
+            </form>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Recent Requests</h3>
+            <div class="request" *ngFor="let request of requests">
+              <div>
+                <p class="request-title">
+                  {{ request.requesterName }} · {{ request.serviceName || request.serviceId }}
+                </p>
+                <p class="request-meta">
+                  {{ request.role }} · {{ request.duration }} · {{ request.estimatedTokens }} tokens
+                </p>
+                <p class="muted">Application: {{ request.applicationName }}</p>
+              </div>
+              <div class="request-actions">
+                <span class="status">{{ request.status }}</span>
+                <button class="ghost small" type="button" (click)="editRequest(request)">Edit</button>
+                <button class="ghost small" type="button" (click)="deleteRequest(request.id)">Delete</button>
+              </div>
+            </div>
+          </div>
+          <div class="card" *ngIf="requestEdit">
+            <h3>Edit Request</h3>
+            <form (ngSubmit)="saveRequest()" class="form">
+              <label>
+                Status
+                <select [(ngModel)]="requestEdit.status" name="status">
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </label>
+              <label>
+                Decision Notes
+                <textarea [(ngModel)]="requestEdit.decisionNotes" name="decisionNotes" rows="3"></textarea>
+              </label>
+              <button type="submit">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="policy">
+        <div class="section-header">
+          <h2>AI Policy Highlights</h2>
+          <p>Guidance for responsible AI usage aligned with academic integrity and privacy.</p>
+        </div>
+        <div class="grid two">
+          <div class="card">
+            <h3>Policy Principles</h3>
+            <ul>
+              <li>AI augments human learning and instruction.</li>
+              <li>Human oversight is mandatory for AI-assisted outputs.</li>
+              <li>Sensitive data must never be shared externally.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Latest Policy Publication</h3>
+            <p class="policy-title">{{ policies[0]?.title }}</p>
+            <p class="policy-version">{{ policies[0]?.version }} · {{ policies[0]?.publishedOn | date }}</p>
+            <p>{{ policies[0]?.summary }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="prompts">
+        <div class="section-header">
+          <h2>Prompt Library</h2>
+          <p>Reusable, high-quality prompts aligned with ITI training tracks.</p>
+        </div>
+        <div class="grid three">
+          <div class="card" *ngFor="let prompt of prompts">
+            <span class="badge">{{ prompt.status }}</span>
+            <h3>{{ prompt.track }}</h3>
+            <p class="prompt-title">{{ prompt.title }}</p>
+            <p>{{ prompt.description }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="admin">
+        <div class="section-header">
+          <h2>Admin Installation Wizard</h2>
+          <p>Administrators can onboard AI services, manage policies, roles, and prompt assets.</p>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Add AI Service</h3>
+            <form class="form" (ngSubmit)="submitService()">
+              <label>
+                Service Name
+                <input [(ngModel)]="serviceDraft.name" name="serviceName" />
+              </label>
+              <label>
+                Provider
+                <input [(ngModel)]="serviceDraft.provider" name="serviceProvider" placeholder="Azure, OpenAI, AWS" />
+              </label>
+              <label>
+                Category
+                <input [(ngModel)]="serviceDraft.category" name="serviceCategory" />
+              </label>
+              <label>
+                Description
+                <textarea [(ngModel)]="serviceDraft.description" name="serviceDescription" rows="3"></textarea>
+              </label>
+              <label>
+                Eligibility
+                <input [(ngModel)]="serviceDraft.eligibility" name="serviceEligibility" />
+              </label>
+              <label>
+                Access Rules
+                <input [(ngModel)]="serviceDraft.accessRules" name="serviceRules" />
+              </label>
+              <label>
+                Owner
+                <input [(ngModel)]="serviceDraft.owner" name="serviceOwner" />
+              </label>
+              <label class="checkbox">
+                <input type="checkbox" [(ngModel)]="serviceDraft.isApiAccess" name="serviceApiAccess" />
+                API Access Required
+              </label>
+              <label>
+                Student Token Limit
+                <input type="number" [(ngModel)]="serviceDraft.studentTokenLimit" name="studentLimit" />
+              </label>
+              <label>
+                Employee Token Limit
+                <input type="number" [(ngModel)]="serviceDraft.employeeTokenLimit" name="employeeLimit" />
+              </label>
+              <button type="submit" [disabled]="!isAdmin">Add Service</button>
+              <p class="muted" *ngIf="!isAdmin">Admin login required to add services.</p>
+            </form>
+          </div>
+          <div class="card">
+            <h3>Manage Services</h3>
+            <div class="request" *ngFor="let service of services">
+              <div>
+                <p class="request-title">{{ service.provider }} · {{ service.name }}</p>
+                <p class="request-meta">Student: {{ service.studentTokenLimit }} · Employee: {{ service.employeeTokenLimit }}</p>
+              </div>
+              <div class="request-actions">
+                <button class="ghost small" type="button" (click)="editService(service)">Edit</button>
+                <button class="ghost small" type="button" (click)="deleteService(service.id)">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two" *ngIf="serviceEdit">
+          <div class="card">
+            <h3>Edit Service</h3>
+            <form class="form" (ngSubmit)="saveService()">
+              <label>
+                Service Name
+                <input [(ngModel)]="serviceEdit.name" name="editServiceName" />
+              </label>
+              <label>
+                Provider
+                <input [(ngModel)]="serviceEdit.provider" name="editServiceProvider" />
+              </label>
+              <label>
+                Category
+                <input [(ngModel)]="serviceEdit.category" name="editServiceCategory" />
+              </label>
+              <label>
+                Description
+                <textarea [(ngModel)]="serviceEdit.description" name="editServiceDescription" rows="3"></textarea>
+              </label>
+              <label>
+                Student Token Limit
+                <input type="number" [(ngModel)]="serviceEdit.studentTokenLimit" name="editStudentLimit" />
+              </label>
+              <label>
+                Employee Token Limit
+                <input type="number" [(ngModel)]="serviceEdit.employeeTokenLimit" name="editEmployeeLimit" />
+              </label>
+              <button type="submit">Save Service</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="grid three">
+          <div class="card">
+            <h3>Policies</h3>
+            <form class="form" (ngSubmit)="submitPolicy()">
+              <label>
+                Title
+                <input [(ngModel)]="policyDraft.title" name="policyTitle" />
+              </label>
+              <label>
+                Version
+                <input [(ngModel)]="policyDraft.version" name="policyVersion" />
+              </label>
+              <label>
+                Summary
+                <textarea [(ngModel)]="policyDraft.summary" name="policySummary" rows="3"></textarea>
+              </label>
+              <button type="submit" [disabled]="!isAdmin">Add Policy</button>
+            </form>
+            <div class="list">
+              <div *ngFor="let policy of policies" class="list-item">
+                <p class="request-title">{{ policy.title }}</p>
+                <div class="request-actions">
+                  <button class="ghost small" type="button" (click)="editPolicy(policy)">Edit</button>
+                  <button class="ghost small" type="button" (click)="deletePolicy(policy.id)">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Roles</h3>
+            <form class="form" (ngSubmit)="submitRole()">
+              <label>
+                Role Name
+                <input [(ngModel)]="roleDraft.name" name="roleName" />
+              </label>
+              <label>
+                Responsibilities
+                <textarea [(ngModel)]="roleDraft.responsibilities" name="roleResponsibilities" rows="3"></textarea>
+              </label>
+              <button type="submit" [disabled]="!isAdmin">Add Role</button>
+            </form>
+            <div class="list">
+              <div *ngFor="let role of roles" class="list-item">
+                <p class="request-title">{{ role.name }}</p>
+                <div class="request-actions">
+                  <button class="ghost small" type="button" (click)="editRole(role)">Edit</button>
+                  <button class="ghost small" type="button" (click)="deleteRole(role.id)">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Prompt Assets</h3>
+            <form class="form" (ngSubmit)="submitPrompt()">
+              <label>
+                Track
+                <input [(ngModel)]="promptDraft.track" name="promptTrack" />
+              </label>
+              <label>
+                Title
+                <input [(ngModel)]="promptDraft.title" name="promptTitle" />
+              </label>
+              <label>
+                Description
+                <textarea [(ngModel)]="promptDraft.description" name="promptDescription" rows="3"></textarea>
+              </label>
+              <label>
+                Status
+                <input [(ngModel)]="promptDraft.status" name="promptStatus" />
+              </label>
+              <button type="submit" [disabled]="!isAdmin">Add Prompt</button>
+            </form>
+            <div class="list">
+              <div *ngFor="let prompt of prompts" class="list-item">
+                <p class="request-title">{{ prompt.title }}</p>
+                <div class="request-actions">
+                  <button class="ghost small" type="button" (click)="editPrompt(prompt)">Edit</button>
+                  <button class="ghost small" type="button" (click)="deletePrompt(prompt.id)">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two" *ngIf="policyEdit || roleEdit || promptEdit">
+          <div class="card" *ngIf="policyEdit">
+            <h3>Edit Policy</h3>
+            <form class="form" (ngSubmit)="savePolicy()">
+              <label>
+                Title
+                <input [(ngModel)]="policyEdit.title" name="editPolicyTitle" />
+              </label>
+              <label>
+                Version
+                <input [(ngModel)]="policyEdit.version" name="editPolicyVersion" />
+              </label>
+              <label>
+                Summary
+                <textarea [(ngModel)]="policyEdit.summary" name="editPolicySummary" rows="3"></textarea>
+              </label>
+              <button type="submit">Save Policy</button>
+            </form>
+          </div>
+
+          <div class="card" *ngIf="roleEdit">
+            <h3>Edit Role</h3>
+            <form class="form" (ngSubmit)="saveRole()">
+              <label>
+                Role Name
+                <input [(ngModel)]="roleEdit.name" name="editRoleName" />
+              </label>
+              <label>
+                Responsibilities
+                <textarea [(ngModel)]="roleEdit.responsibilities" name="editRoleResponsibilities" rows="3"></textarea>
+              </label>
+              <button type="submit">Save Role</button>
+            </form>
+          </div>
+
+          <div class="card" *ngIf="promptEdit">
+            <h3>Edit Prompt</h3>
+            <form class="form" (ngSubmit)="savePrompt()">
+              <label>
+                Track
+                <input [(ngModel)]="promptEdit.track" name="editPromptTrack" />
+              </label>
+              <label>
+                Title
+                <input [(ngModel)]="promptEdit.title" name="editPromptTitle" />
+              </label>
+              <label>
+                Description
+                <textarea [(ngModel)]="promptEdit.description" name="editPromptDescription" rows="3"></textarea>
+              </label>
+              <label>
+                Status
+                <input [(ngModel)]="promptEdit.status" name="editPromptStatus" />
+              </label>
+              <button type="submit">Save Prompt</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div>
+      <h3>ITI AI Playground</h3>
+      <p>Information Technology Institute · MCIT · Egypt</p>
+    </div>
+    <div>
+      <p>Contact</p>
+      <p>ai-governance@iti.gov.eg</p>
+      <p>+20 (2) 1234 5678</p>
+    </div>
+  </footer>
+</div>
